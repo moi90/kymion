@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools", "wheel", "versioneer[toml]"]
+
+[tool.black]
+exclude = "\\.eggs|\\.git|\\.hg|\\.mypy_cache|\\.nox|\\.tox|\\.venv|_build|buck-out|build|dist|versioneer\\.py|_version\\.py|\\.vscode"
+line_length = 88
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "src/kymion/_version.py"
+versionfile_build = "kymion/_version.py"
+tag_prefix = "v"
+parentdir_prefix = ""

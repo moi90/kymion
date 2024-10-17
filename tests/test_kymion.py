@@ -3,7 +3,7 @@ import time
 from unittest.mock import ANY, Mock
 
 
-from kymion import NonBlockingRelay, ProgressHandler, get_progress_reporter
+from kymion.core import Event, NonBlockingRelay, ProgressHandler, get_progress_reporter
 
 
 def test_task():
@@ -16,14 +16,14 @@ def test_task():
     t1 = progress_reporter.task(total=10)
 
     # Handler got an initialization event
-    handler.handle_event.assert_called_with((t1.id, ANY, 0, 10, None, False))
+    handler.handle_event.assert_called_with(Event(t1.id, ANY, 0, 10, None, False))
 
     for _ in range(10):
         t1.update()
     t1.finish()
 
     # Handler got a "finished" event
-    handler.handle_event.assert_called_with((t1.id, ANY, 10, 10, None, True))
+    handler.handle_event.assert_called_with(Event(t1.id, ANY, 10, 10, None, True))
 
     # Test context manager
     with progress_reporter.task(range(10)) as t2:
@@ -31,8 +31,8 @@ def test_task():
             pass
 
     # Handler got an initialization and "finished" event
-    handler.handle_event.assert_any_call((t2.id, ANY, 0, 10, None, False))
-    handler.handle_event.assert_called_with((t2.id, ANY, 10, 10, None, True))
+    handler.handle_event.assert_any_call(Event(t2.id, ANY, 0, 10, None, False))
+    handler.handle_event.assert_called_with(Event(t2.id, ANY, 10, 10, None, True))
 
 
 def test_rate_limiting():
@@ -53,13 +53,13 @@ def test_rate_limiting():
 
     t.finish()
     # Ensure finish event is reported
-    handler.handle_event.assert_called_with((t.id, ANY, 10, 10, None, True))
+    handler.handle_event.assert_called_with(Event(t.id, ANY, 10, 10, None, True))
 
 
 def test_thread_safety():
     class VerySlowHandler(ProgressHandler):
         def handle_event(self, event):
-            print(event[0])
+            print(event.task_id)
             time.sleep(1)
 
     very_slow_handler = Mock(wraps=VerySlowHandler())
@@ -81,7 +81,7 @@ def test_thread_safety():
     # Ensure all threads updated correctly, and start and finish is reported
     for i, thread in enumerate(threads):
         thread.join()
-        relay.handle_event.assert_any_call((ANY, ANY, 0, 5, str(i), False))
-        relay.handle_event.assert_any_call((ANY, ANY, 5, 5, str(i), True))
+        relay.handle_event.assert_any_call(Event(ANY, ANY, 0, 5, str(i), False))
+        relay.handle_event.assert_any_call(Event(ANY, ANY, 5, 5, str(i), True))
 
     assert very_slow_handler.handle_event.call_count < relay.handle_event.call_count

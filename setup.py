@@ -18,8 +18,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     include_package_data=True,
-    install_requires=[
-    ],
+    install_requires=["attrs"],
     python_requires=">=3.9",
     extras_require={
         "tests": [
@@ -27,9 +26,7 @@ setup(
             "pytest-cov",
             "codecov",
         ],
-        "dev": [
-            "versioneer[toml]"
-        ]
+        "dev": ["versioneer[toml]"],
     },
     entry_points={},
     classifiers=[

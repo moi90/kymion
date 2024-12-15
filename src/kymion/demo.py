@@ -17,7 +17,7 @@ def run_demo():
         description="Overall",
     ):
         print(f"{step}...")
-        for j in progress_reporter.task(
+        for _ in progress_reporter.task(
             range(random.randint(10, 1000)), description=step
         ):
             time.sleep(random.uniform(1e-6, 1e-3))

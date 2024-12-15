@@ -7,6 +7,7 @@ import attrs
 
 @attrs.define
 class Event:
+    name: str
     task_id: int
     time: float
     progress: float
@@ -19,7 +20,8 @@ class ProgressReporter:
     root: "ProgressReporter"
     manager: "ProgressReporterManager"
 
-    def __init__(self, parent: Optional["ProgressReporter"]) -> None:
+    def __init__(self, name: str, parent: Optional["ProgressReporter"]) -> None:
+        self.name = name
         self.parent = parent
         self.handlers: "List[ProgressHandler]" = []
 
@@ -27,7 +29,7 @@ class ProgressReporter:
         if not handler in self.handlers:
             self.handlers.append(handler)
 
-    def notify_handlers(self, event: Event):
+    def handle_event(self, event: Event):
         pr = self
         while pr is not None:
             for handler in pr.handlers:
@@ -98,9 +100,15 @@ class Task:
         self.last_notify_n = self.progress
         self.last_notify_t = t
 
-        self.progress_reporter.notify_handlers(
+        self.progress_reporter.handle_event(
             Event(
-                self.id, t, self.progress, self.total, self.description, self.finished
+                self.progress_reporter.name,
+                self.id,
+                t,
+                self.progress,
+                self.total,
+                self.description,
+                self.finished,
             )
         )
 
@@ -132,11 +140,28 @@ class ProgressHandler:
 
 
 class ProgressReporterManager:
+    """
+    A manager for named instances of ProgressReporter objects.
+    """
+
     def __init__(self, root: ProgressReporter) -> None:
         self.root = root
         self.progress_reporters: Dict[str, ProgressReporter] = {}
 
-    def getProgressReporter(self, name: Optional[str]) -> ProgressReporter:
+    def get_progress_reporter(self, name: Optional[str] = None) -> ProgressReporter:
+        """
+        Retrieve or create a ProgressReporter by name.
+
+        If specified, the name is typically a dot-separated hierarchical name like 'a', 'a.b' or 'a.b.c.d'.
+        Choice of these names is entirely up to the developer.
+
+        All calls to this function with a given name return the same ProgressReporter instance.
+
+        Args:
+            name (Optional[str]): The name of the desired ProgressReporter.
+                If None, the root ProgressReporter is returned.
+        """
+
         if name is None:
             return self.root
 
@@ -145,14 +170,15 @@ class ProgressReporterManager:
         except KeyError:
             pass
 
-        pr = self.progress_reporters[name] = ProgressReporter(self.root)
+        # TODO: Instead of root, we have to find the correct parent!
+        pr = self.progress_reporters[name] = ProgressReporter(name, self.root)
 
         return pr
 
 
-ProgressReporter.root = root = ProgressReporter(None)
+ProgressReporter.root = root = ProgressReporter("root", None)
 ProgressReporter.manager = manager = ProgressReporterManager(root)
-get_progress_reporter = manager.getProgressReporter
+get_progress_reporter = manager.get_progress_reporter
 
 del root
 del manager

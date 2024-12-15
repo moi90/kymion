@@ -5,9 +5,10 @@ It provides a simple and intuitive way to track the progress of tasks while allo
 Similar to Python's [logging](https://docs.python.org/3/library/logging.html) module, different handlers can be used to report progress.
 
 The primary purpose of Kymion is to **decouple progress reporting from its visualization**:
+
 - Libraries can implement progress reporting in a **frontend-agnostic** way.
 - Application developers can choose the appropriate frontend or visualization for their context
-(like a console progress bar, a REST API endpoint for remote progress tracking, logging progress to a file, a Jupyter notebook widget, a progress bar in a GUI framework).
+  (like a console progress bar, a REST API endpoint for remote progress tracking, logging progress to a file, a Jupyter notebook widget, a progress bar in a GUI framework).
 
 ## Features:
 
@@ -15,6 +16,7 @@ The primary purpose of Kymion is to **decouple progress reporting from its visua
 - Multiple Frontends: Kymion provides frontends based on popular libraries like tqdm and Rich, with additional flexibility to log progress to files, send updates to REST APIs, or display them in a GUI.
 - Multi-Handler Support: Report progress to multiple frontends simultaneously (e.g., console, file logging, and GUI).
 - Task Management: Supports tracking multiple tasks, including serial and parallel tasks, making it suitable for complex workflows.
+- Distributed Progress Reporting: Progress from tasks running in child processes can be forwarded to the main thread.
 
 ## Basic Usage
 
@@ -35,6 +37,7 @@ def my_library_function(data):
 ```
 
 ### For Application Developers:
+
 Add the appropriate handler to visualize or log the progress:
 
 ```python
@@ -48,18 +51,26 @@ root_progress_reporter = get_progress_reporter()
 root_progress_reporter.add_handler(RichHandler())
 ```
 
+### Distributed Progress Reporting
+
+Kymion supports progress reporting across multiprocessing environments, e.g. with `concurrent.futures.ProcessPoolExecutor`.
+Progress from tasks running in child processes is forwarded to the main thread.
+
+See [examples/process_pool_executor.py](examples/process_pool_executor.py) for an example.
+
 ## Related Work
 
 - [**tqdm**](https://github.com/tqdm/tqdm) provides console-based or notebook-based progress bars. It is known for its simplicity, with very little setup required to add a progress bar to loops or tasks. Still, a rich set of features is available.
 - [**Rich**](https://github.com/Textualize/rich) is is a library for text formatting in the terminal and to build console-based UIs. It can be used to display progress bars.
 - [**alive-progress**](https://github.com/rsalmei/alive-progress) is another console-based progress bar library with a large number of styles and animations.
 
-All these focus on reporting progress *in the console*. In fact, tqdm-based and Rich-based frontends are available.
+All these focus on reporting progress _in the console_. In fact, tqdm-based and Rich-based frontends are also available for Kymion.
 
 ### When to Choose Kymion?
 
 - If you're developing a library and want to decouple progress reporting from the presentation layer.
 - When you need to support multiple output frontends (e.g., console, GUI, log files) without modifying your core library code.
+- When you want to report progress from child processes.
 
 ## **Contributing**
 

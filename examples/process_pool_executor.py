@@ -1,3 +1,8 @@
+"""
+This example shows how progress updates from tasks running in separate processes can be forwarded
+to the main thread and monitored or displayed using Kymion's progress reporting infrastructure.
+"""
+
 import multiprocessing
 import random
 import time

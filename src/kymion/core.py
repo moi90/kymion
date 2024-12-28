@@ -8,12 +8,19 @@ import attrs
 @attrs.define
 class Event:
     name: str
+    """The name of the ProgressReporter that emitted the event."""
     task_id: int
+    """The unique identifier of the task."""
     time: float
+    """The time at which the event occurred."""
     progress: float
+    """The current progress of the task (in task units)."""
     total: Optional[float]
+    """The total amount of work to be done (in task units)."""
     description: Optional[str]
+    """A description of the task."""
     finished: bool
+    """Whether the task has finished."""
 
 
 class ProgressReporter:

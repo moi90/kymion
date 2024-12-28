@@ -18,7 +18,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     include_package_data=True,
-    install_requires=["attrs"],
+    install_requires=["attrs", "prefixed"],
     python_requires=">=3.9",
     extras_require={
         "tests": [
